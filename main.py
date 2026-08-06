@@ -6,7 +6,8 @@ import yt_dlp
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 
-TOKEN = "8909156348:AAGovakkMMbv3HkFqQVRE_bnv78H8b2r3Jc"
+TOKEN = "8909156348:AAESlvw-ej2xEwiZIR0GWbCE3o_2nB7DI8s"
+
 CHANNEL_USERNAME = "@Riiin69"
 SUPPORT_USERNAME = "@rvviii69"
 
