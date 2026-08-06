@@ -10,7 +10,7 @@ import yt_dlp
 
 logging.basicConfig(level=logging.INFO)
 
-TOKEN = "8909156348:AAESlvw-ej2xEwiZIR0GWbCE3o_2nB7DI8s"
+TOKEN = "8909156348:AAGzfDSvMX_49KpS-op9jb05Z6onpwvfdk4"
 ADMIN_ID = 5664157833             # آيدي حسابك لتلقي الرسائل
 CHANNEL_USERNAME = "@rin_media"  # يوزر قناتك لشرط الاشتراك
 
@@ -23,7 +23,7 @@ async def is_subscribed(user_id: int, context: ContextTypes.DEFAULT_TYPE) -> boo
         return member.status in ['member', 'administrator', 'creator']
     except Exception as e:
         logging.error(f"Subscription Check Error: {e}")
-        return True  # في حال وجود خطأ في الصلاحيات لا نعطل المستخدم
+        return True
 
 # رسالة الترحيب والأزرار
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -59,7 +59,7 @@ async def auto_delete_messages(bot, chat_id, message_ids, delay=30):
         except Exception:
             pass
 
-# التفاعل مع الأزرار (تحقق من الاشتراك)
+# التفاعل مع أزرار الاشتراك
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -78,13 +78,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     text = update.message.text.strip() if update.message.text else ""
 
-    # 1. توجيه جميع رسائل العالم للإدمن فوراً 📩
+    # توجيه جميع رسائل العالم للإدمن فوراً 📩
     if user.id != ADMIN_ID:
         try:
             admin_log = (
                 f"📬 <b>رسالة جديدة من مستخدم:</b>\n"
                 f"👤 <b>الاسم:</b> {user.full_name}\n"
-                f"ج <b>اليوزر:</b> @{user.username if user.username else 'بدون يوزر'}\n"
+                f"👤 <b>اليوزر:</b> @{user.username if user.username else 'بدون يوزر'}\n"
                 f"🆔 <b>ID:</b> <code>{user.id}</code>\n\n"
                 f"💬 <b>المحتوى:</b>\n<code>{text}</code>"
             )
@@ -92,7 +92,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except Exception as e:
             logging.error(f"Failed to forward to admin: {e}")
 
-    # 2. شرط الاشتراك الإجباري 🔒
+    # شرط الاشتراك الإجباري 🔒
     subscribed = await is_subscribed(user.id, context)
     if not subscribed:
         sub_keyboard = InlineKeyboardMarkup([
@@ -115,7 +115,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     download_dir = os.path.join('downloads', session_id)
     os.makedirs(download_dir, exist_ok=True)
 
-    # إعدادات yt-dlp المتطورة للستوريات والهايلات والمقاطع
     ydl_opts = {
         'outtmpl': os.path.join(download_dir, '%(id)s_%(autonumber)s.%(ext)s'),
         'quiet': True,
@@ -185,7 +184,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
         await status_msg.delete()
 
-        # جدولة الحذف التلقائي للملفات بعد 30 ثانية ⏱️
+        # جدولة الحذف التلقائي بعد 30 ثانية ⏱️
         if sent_messages:
             asyncio.create_task(auto_delete_messages(context.bot, chat_id, sent_messages, delay=30))
 
