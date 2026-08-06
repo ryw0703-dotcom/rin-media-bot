@@ -4,6 +4,9 @@ import uuid
 import shutil
 import asyncio
 import logging
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
+
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, InputMediaVideo
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 import yt_dlp
@@ -15,6 +18,19 @@ ADMIN_ID = 5664157833             # آيدي حسابك لتلقي الرسائ�
 CHANNEL_USERNAME = "@rin_media"  # يوزر قناتك لشرط الاشتراك
 
 SUPPORTED_DOMAINS = re.compile(r'(tiktok\.com|instagram\.com|twitter\.com|x\.com|snapchat\.com)')
+
+# خادم ويب وهمي لإبقاء Render شغال 24/7
+class HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"Bot is running alive!")
+
+def run_dummy_server():
+    port = int(os.environ.get("PORT", 8080))
+    server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
+    server.serve_forever()
 
 # التحقق من اشتراك المستخدم في القناة
 async def is_subscribed(user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
@@ -199,6 +215,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     if not os.path.exists('downloads'):
         os.makedirs('downloads')
+
+    # تشغيل سيرفر الويب الخلفي لإبقاء الخدمة شغال على Render
+    threading.Thread(target=run_dummy_server, daemon=True).start()
         
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
