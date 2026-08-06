@@ -10,13 +10,12 @@ import yt_dlp
 
 logging.basicConfig(level=logging.INFO)
 
-TOKEN = os.environ.get("TOKEN", "8909156348:AAESlvw-ej2xEwiZIR0GWbCE3o_2nB7DI8s")
+TOKEN = "8909156348:AAESlvw-ej2xEwiZIR0GWbCE3o_2nB7DI8s"
 
-# المنصات المسموحة فقط (تيك توك، إنستغرام، تويتر/X، سناب شات)
 SUPPORTED_DOMAINS = re.compile(r'(tiktok\.com|instagram\.com|twitter\.com|x\.com|snapchat\.com)')
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("أهلاً بك! أرسل رابط (تيك توك، إنستغرام، تويتر، سناب شات) لتحميل المقاطع والصور مباشرة.")
+    await update.message.reply_text("أهلاً بك! أرسل رابط (تيك توك، إنستغرام، تويتر، سناب شات) لتحميل المقاطع والصور مباشرة.\n\nللدعم الفني: @rvviii69")
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = update.message.text.strip()
@@ -26,7 +25,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     status_msg = await update.message.reply_text("⏳ جاري جلب وسائط الرابط...")
 
-    # إنشاء مجلد مؤقت فريد لكل عملية لمنع تداخل ملفات المستخدمين
     session_id = str(uuid.uuid4())
     download_dir = os.path.join('downloads', session_id)
     os.makedirs(download_dir, exist_ok=True)
@@ -53,18 +51,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         
         if not info:
             await status_msg.edit_text("❌ لم يتم العثور على محتوى أو الحساب خاص.")
-            shutil.rmtree(download_dir, ignore_errors=True)
             return
 
         downloaded_files = []
-        for f in os.listdir(download_dir):
-            file_path = os.path.join(download_dir, f)
-            if os.path.isfile(file_path):
-                downloaded_files.append(file_path)
+        if os.path.exists(download_dir):
+            for f in os.listdir(download_dir):
+                file_path = os.path.join(download_dir, f)
+                if os.path.isfile(file_path):
+                    downloaded_files.append(file_path)
 
         if not downloaded_files:
             await status_msg.edit_text("❌ تعذر تحميل الوسائط من هذا الرابط.")
-            shutil.rmtree(download_dir, ignore_errors=True)
             return
 
         media_group = []
@@ -80,7 +77,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elif ext in ['.mp4', '.mkv', '.mov', '.webm']:
                 media_group.append(InputMediaVideo(media=f))
 
-        # إرسال الوسائط
         if len(media_group) == 1:
             with open(downloaded_files[0], 'rb') as f_single:
                 if isinstance(media_group[0], InputMediaPhoto):
@@ -101,7 +97,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await status_msg.edit_text("❌ حدث خطأ أثناء التحميل. تأكد من صحة الرابط وأن الحساب ليس خاصاً.")
 
     finally:
-        # تنظيف المجلد المؤقت دائماً
         if os.path.exists(download_dir):
             shutil.rmtree(download_dir, ignore_errors=True)
 
