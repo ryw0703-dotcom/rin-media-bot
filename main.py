@@ -2,14 +2,30 @@ import os
 import re
 import html
 import asyncio
+import threading
 import requests
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 
+# --- سيرفر وهمي لإرضاء Render ---
+web_app = Flask('')
+
+@web_app.route('/')
+def home():
+    return "Bot is running!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    web_app.run(host='0.0.0.0', port=port)
+
+# تشغيل السيرفر في الخلفية
+threading.Thread(target=run_flask, daemon=True).start()
+
+# --- كود البوت الأصلي ---
 TOKEN = "8909156348:AAFn4Ys3sjr4jnYlPxKzp9jXsILVBc7INYs"
 CHANNEL_USERNAME = "@Riiin69"
 SUPPORT_USERNAME = "@rvviii69"
-
 ADMIN_ID = 7195085575  
 
 async def check_subscription(user_id: int, context: ContextTypes.DEFAULT_TYPE) -> bool:
