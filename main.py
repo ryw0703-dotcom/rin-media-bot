@@ -8,7 +8,7 @@ from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 
-# --- سيرفر وهمي لإرضاء Render ---
+# --- سيرفر لإرضاء Render وإبقاء الخدمة نشطة مع UptimeRobot ---
 web_app = Flask('')
 
 @web_app.route('/')
@@ -22,8 +22,9 @@ def run_flask():
 # تشغيل السيرفر في الخلفية
 threading.Thread(target=run_flask, daemon=True).start()
 
-# --- كود البوت الأصلي ---
-TOKEN = "8909156348:AAFn4Ys3sjr4jnYlPxKzp9jXsILVBc7INYs"
+# --- إعدادات البوت الأساسية ---
+# جلب التوكن من متغيّرات البيئة في Render أو استخدام التوكن الافتراضي
+TOKEN = os.environ.get("BOT_TOKEN", "8909156348:AAFn4Ys3sjr4jnYlPxKzp9jXsILVBc7INYs")
 CHANNEL_USERNAME = "@Riiin69"
 SUPPORT_USERNAME = "@rvviii69"
 ADMIN_ID = 7195085575  
@@ -262,4 +263,6 @@ if __name__ == '__main__':
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CallbackQueryHandler(check_button_callback, pattern="^check_sub$"))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, download_media))
-    app.run_polling()
+
+    print("Bot is running...")
+    app.run_polling(drop_pending_updates=True)
